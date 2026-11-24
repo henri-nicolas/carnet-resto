@@ -130,7 +130,7 @@ summary{font-weight:700;min-height:32px;cursor:pointer}
 <body>
 <div id="app">
 <header>
-  <h1>Carnet resto<small id="hsub">Montpellier · Lunel · littoral</small></h1>
+  <h1>Carnet resto<small id="hsub" data-v="1.2">Montpellier · Lunel · littoral</small></h1>
   <button class="ib" id="bSet" aria-label="Réglages"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button>
 </header>
 <main>
@@ -216,7 +216,7 @@ function isDue(r){const s=S.suivi[r.id];return !!(s&&s.next&&s.next<=today()&&['
 const map=L.map('map',{preferCanvas:true,zoomControl:false,minZoom:9,maxZoom:18}).setView([43.60,3.93],11);
 map.attributionControl.setPrefix('');
 const cv=L.canvas({padding:.3});
-L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',{subdomains:'abcd',maxZoom:19,attribution:'© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> © <a href="https://carto.com/attributions">CARTO</a>'}).addTo(map);
+L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'}).addTo(map);
 const BIG=['Montpellier','Lunel','Mauguio','Grande-Motte','Palavas-les-Flots','Lattes','Castelnau-le-Lez','Pérols','Grau-du-Roi','Castries','Juvignac','Saint-Jean-de-Védas'];
 const gBase=L.layerGroup().addTo(map),gBig=L.layerGroup().addTo(map),gRoads=L.layerGroup().addTo(map),gMinor=L.layerGroup(),gZones=L.layerGroup().addTo(map),gRest=L.layerGroup().addTo(map),gLabels=L.layerGroup();
 let homeMk=null;
@@ -362,7 +362,7 @@ function apply(j){const pend=new Set(Q.map(q=>q.table+'/'+q.id));
   const rebuild=!S.restos.length||S.restos.length!==(j.restos||[]).length+Object.keys(j.ajouts||{}).length;
   if(rebuild){S.restos=[];S.byId={};(j.restos||[]).forEach(a=>addResto(a));const aj=keep('ajouts',j.ajouts||{});for(const[id,x]of Object.entries(aj))addAjout(id,x);buildMarkers()}
   else{S.restos.forEach(r=>r.avoid=inAvoid(r));restyleAll()}
-  drawZones();$('#hsub').textContent=S.restos.length.toLocaleString('fr-FR')+' établissements';refresh();if($('#v-ann').classList.contains('on'))renderAnn()}
+  drawZones();$('#hsub').textContent=S.restos.length.toLocaleString('fr-FR')+' établissements · v1.2';refresh();if($('#v-ann').classList.contains('on'))renderAnn()}
 document.addEventListener('visibilitychange',()=>{if(!document.hidden&&Date.now()-S.loadedAt>60000)load()});
 function refresh(){if($('#v-tour').classList.contains('on'))renderTour();if($('#v-stats').classList.contains('on'))renderStats()}
 
