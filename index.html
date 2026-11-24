@@ -293,7 +293,7 @@ function openResto(id){const r=S.byId[id];if(!r)return;S.open=id;const s=S.suivi
   const hist=(s.visits||[]).slice().reverse().map(v=>`<div class="hist"><b>${frDate(v.t,true)} · ${esc((RES.find(x=>x[0]===v.res)||[,v.res])[1])}</b><p>${esc([v.who,v.nom].filter(Boolean).join(' – '))}${v.note?' : « '+esc(v.note)+' »':''}</p></div>`).join('');
   openSheet(`<h2>${esc(r.name)}</h2><div class="sub">${esc(KIND[r.k]||'')}${r.cui?' · '+esc(r.cui.replace(/_/g,' ').replace(/;/g,', ')):''} · ${d.toFixed(1).replace('.',',')} km</div>
   <div class="sub">${esc([r.addr,r.cp,r.city||r.commune].filter(Boolean).join(' '))}</div>
-  ${r.avoid?`<p class="tag" style="background:#fde3e1;color:#8a1f17;margin-top:8px">Zone évitée : ${esc(r.avoid)}</p>`:''}
+  ${r.approx?`<p class="tag" style="background:#fff1d6;color:#7a4b00;margin-top:8px">Position approximative : adresse exacte à confirmer</p>`:''}${r.src?`<p class="small">Source : ${esc(r.src)}</p>`:''}${r.avoid?`<p class="tag" style="background:#fde3e1;color:#8a1f17;margin-top:8px">Zone évitée : ${esc(r.avoid)}</p>`:''}
   <div class="row" style="margin-top:10px"><span class="tag"><span class="dot" style="width:12px;height:12px;background:${ST[st].c}"></span>${ST[st].l}</span>${s.next?`<span class="tag">Relance ${frDate(s.next)}</span>`:''}</div>
   <button class="btn main full" style="margin-top:16px" id="bVisit">J’y suis passée</button>
   ${navLinks(r)}
@@ -338,7 +338,7 @@ function openAdd(lat,lon){openSheet(`<h2>Ajouter un resto</h2><p class="sub">Il 
 
 /* ---------- data loading ---------- */
 function addResto(a){const[id,lat,lon,k,name,commune,cui,brand,tel,web,hours]=a;if(S.byId[id])return null;const r={id,lat:+lat,lon:+lon,k,name:String(name),addr:'',commune:String(commune||''),cui:String(cui||''),brand:String(brand||''),tel:String(tel||''),web:String(web||''),hours:String(hours||'')};r.auto=autoPrio(r);r.avoid=inAvoid(r);S.restos.push(r);S.byId[id]=r;return r}
-function addAjout(id,x,single){const r=addResto([id,x.lat,x.lon,x.k,x.name,'']);if(!r)return;r.addr=x.addr||'';
+function addAjout(id,x,single){const r=addResto([id,x.lat,x.lon,x.k,x.name,x.commune||'','','',x.tel||'','',x.hours||'']);if(!r)return;r.addr=x.addr||'';r.approx=!!x.approx;r.src=x.src||'';
   if(single){const m=L.circleMarker([r.lat,r.lon],{renderer:cv,...styleFor(r)});m.on('click',e=>{L.DomEvent.stop(e);if(!S.pick)openResto(r.id)});S.markers[r.id]=m;restyleOne(id)}}
 function askPin(msg){$('#pinE').textContent=msg||'';$('#pin').classList.add('on');setTimeout(()=>$('#pinI').focus(),100)}
 $('#pinF').onsubmit=e=>{e.preventDefault();PIN=$('#pinI').value.trim();try{localStorage.setItem('carnet_pin',PIN)}catch(x){}$('#pin').classList.remove('on');load(true)};
@@ -362,7 +362,7 @@ function apply(j){const pend=new Set(Q.map(q=>q.table+'/'+q.id));
   const rebuild=!S.restos.length||S.restos.length!==(j.restos||[]).length+Object.keys(j.ajouts||{}).length;
   if(rebuild){S.restos=[];S.byId={};(j.restos||[]).forEach(a=>addResto(a));const aj=keep('ajouts',j.ajouts||{});for(const[id,x]of Object.entries(aj))addAjout(id,x);buildMarkers()}
   else{S.restos.forEach(r=>r.avoid=inAvoid(r));restyleAll()}
-  drawZones();$('#hsub').textContent=S.restos.length.toLocaleString('fr-FR')+' établissements · v1.2';refresh();if($('#v-ann').classList.contains('on'))renderAnn()}
+  drawZones();$('#hsub').textContent=S.restos.length.toLocaleString('fr-FR')+' établissements · v1.3';refresh();if($('#v-ann').classList.contains('on'))renderAnn()}
 document.addEventListener('visibilitychange',()=>{if(!document.hidden&&Date.now()-S.loadedAt>60000)load()});
 function refresh(){if($('#v-tour').classList.contains('on'))renderTour();if($('#v-stats').classList.contains('on'))renderStats()}
 
