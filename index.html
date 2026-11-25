@@ -123,6 +123,8 @@ h3.sec{font-size:18px;margin:22px 0 10px}
 .zone{display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line)}
 #pin{position:fixed;inset:0;z-index:3000;background:var(--blue);color:#fff;display:none;place-items:center;padding:24px}#pin.on{display:grid}#pin form{width:min(360px,100%);display:grid;gap:14px}#pin h2{font-size:30px}#pin input{font-size:28px;text-align:center;letter-spacing:.3em;border:0}#pin p{margin:0;opacity:.85}
 .fab button.on{background:var(--blue);color:#fff}.fab button.on svg{stroke:#fff}
+.sheet .panel.top{top:0;bottom:auto;border-radius:0 0 22px 22px;padding-top:calc(env(safe-area-inset-top) + 14px);max-height:70dvh}
+.res{display:grid;gap:6px;margin-top:12px}.res button{display:grid;grid-template-columns:16px 1fr;gap:10px;align-items:center;text-align:left;border:0;background:var(--card);border-radius:12px;padding:12px;min-height:52px}.res b{display:block;font-size:16px}.res span.sub{font-size:13px}
 details{background:var(--card);border-radius:14px;padding:10px 14px;margin-top:12px}
 summary{font-weight:700;min-height:32px;cursor:pointer}
 </style>
@@ -131,6 +133,7 @@ summary{font-weight:700;min-height:32px;cursor:pointer}
 <div id="app">
 <header>
   <h1>Carnet resto<small id="hsub" data-v="1.2">Montpellier · Lunel · littoral</small></h1>
+  <button class="ib" id="bFind" aria-label="Rechercher un restaurant"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg></button>
   <button class="ib" id="bSet" aria-label="Réglages"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button>
 </header>
 <main>
@@ -257,7 +260,7 @@ function banner(t){const b=$('#banner');b.textContent=t||'';b.classList.toggle('
 function showView(v){$$('nav button').forEach(b=>b.classList.toggle('on',b.dataset.v===v));$$('.view').forEach(s=>s.classList.toggle('on',s.id==='v-'+v));if(v==='map')setTimeout(()=>map.invalidateSize(),30);if(v==='tour')renderTour();if(v==='ann')renderAnn();if(v==='stats')renderStats()}
 $$('nav button').forEach(b=>b.onclick=()=>showView(b.dataset.v));
 const sheet=$('#sheet'),panel=$('#panel');
-function openSheet(html){panel.innerHTML='<div class="grab"></div>'+html;sheet.classList.add('on');panel.scrollTop=0}
+function openSheet(html){panel.classList.remove('top');panel.innerHTML='<div class="grab"></div>'+html;sheet.classList.add('on');panel.scrollTop=0}
 function closeSheet(){sheet.classList.remove('on');S.open=null}
 sheet.addEventListener('click',e=>{if(e.target.matches('[data-close]'))closeSheet()});
 
@@ -362,7 +365,7 @@ function apply(j){const pend=new Set(Q.map(q=>q.table+'/'+q.id));
   const rebuild=!S.restos.length||S.restos.length!==(j.restos||[]).length+Object.keys(j.ajouts||{}).length;
   if(rebuild){S.restos=[];S.byId={};(j.restos||[]).forEach(a=>addResto(a));const aj=keep('ajouts',j.ajouts||{});for(const[id,x]of Object.entries(aj))addAjout(id,x);buildMarkers()}
   else{S.restos.forEach(r=>r.avoid=inAvoid(r));restyleAll()}
-  drawZones();$('#hsub').textContent=S.restos.length.toLocaleString('fr-FR')+' établissements · v1.3';refresh();if($('#v-ann').classList.contains('on'))renderAnn()}
+  drawZones();$('#hsub').textContent=S.restos.length.toLocaleString('fr-FR')+' établissements · v1.4';refresh();if($('#v-ann').classList.contains('on'))renderAnn()}
 document.addEventListener('visibilitychange',()=>{if(!document.hidden&&Date.now()-S.loadedAt>60000)load()});
 function refresh(){if($('#v-tour').classList.contains('on'))renderTour();if($('#v-stats').classList.contains('on'))renderStats()}
 
@@ -445,6 +448,14 @@ function openSettings(){const c=cfg();openSheet(`<h2>Réglages</h2>
   $('#sZ').onclick=e=>{const t=e.target.closest('[data-zt]'),d=e.target.closest('[data-zd]');let a=cfg().avoid.map(z=>({...z}));if(t){const z=a.find(x=>x.id===t.dataset.zt);z.on=!z.on}else if(d)a=a.filter(x=>x.id!==d.dataset.zd);else return;saveCfg({avoid:a}).then(openSettings,openSettings)};
   $('#sReload').onclick=()=>{closeSheet();load()};$('#sOut').onclick=()=>{closeSheet();try{localStorage.removeItem('carnet_pin')}catch(x){}PIN='';askPin()}}
 $('#bSet').onclick=openSettings;
+const fold=t=>String(t||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,' ').trim();
+function openFind(){openSheet(`<h2>Rechercher</h2><input type="search" id="fQ" placeholder="Nom du restaurant…" autocomplete="off" autocapitalize="off" enterkeyhint="search"><div class="res" id="fR"></div>`);panel.classList.add('top');const q=$('#fQ');q.focus();
+  const run=()=>{const t=fold(q.value);const box=$('#fR');if(t.length<2){box.innerHTML='<p class="small">Tape au moins 2 lettres.</p>';return}const words=t.split(' ');
+    const hits=S.restos.map(r=>{const n=fold(r.name);if(!words.every(w=>n.includes(w)||fold(r.commune).includes(w)))return null;return[r,(n.startsWith(t)?0:n.includes(t)?1:2)]}).filter(Boolean).sort((a,b)=>a[1]-b[1]||a[0].name.localeCompare(b[0].name)).slice(0,30);
+    box.innerHTML=hits.length?hits.map(([r])=>`<button data-id="${esc(r.id)}"><span class="dot" style="width:14px;height:14px;background:${ST[statusOf(r)].c}"></span><span><b>${esc(r.name)}</b><span class="sub">${esc([KIND[r.k],r.commune].filter(Boolean).join(' · '))}</span></span></button>`).join(''):'<p class="small">Aucun resto trouvé. Tu peux l’ajouter avec le bouton + sur la carte.</p>'};
+  q.oninput=run;run();
+  $('#fR').onclick=e=>{const b=e.target.closest('button[data-id]');if(!b)return;const r=S.byId[b.dataset.id];showView('map');map.setView([r.lat,r.lon],17);if(!visible(r)){S.filter='all';S.high=false;$$('.mapbar .chip[data-f]').forEach(x=>x.classList.toggle('on',x.dataset.f==='all'));$('#fHigh').classList.remove('on');restyleAll()}openResto(r.id)}}
+$('#bFind').onclick=openFind;
 
 function joinRings(segs){const k=p=>p[0].toFixed(6)+','+p[1].toFixed(6);const rings=[];segs=segs.slice();while(segs.length){let r=segs.shift().slice();let grow=true;while(grow&&k(r[0])!==k(r[r.length-1])){grow=false;for(let i=0;i<segs.length;i++){const s=segs[i];if(k(s[0])===k(r[r.length-1])){r=r.concat(s.slice(1));segs.splice(i,1);grow=true;break}if(k(s[s.length-1])===k(r[r.length-1])){r=r.concat(s.slice().reverse().slice(1));segs.splice(i,1);grow=true;break}}}rings.push(r)}return rings}
 
